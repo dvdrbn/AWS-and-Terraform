@@ -79,6 +79,9 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+# TODO: Change ami to one that has nginx preinstalled
+# TODO: remove nginx install
+# TODO: fix sed command or find a different method 
 resource "aws_instance" "nginx" {
   ami                    = data.aws_ami.aws-linux.id
   instance_type          = "t2.micro"
@@ -96,8 +99,15 @@ resource "aws_instance" "nginx" {
   provisioner "remote-exec" {
     inline = [
       "sudo yum install nginx -y",
+      "sudo sed -n -i -e '1h;1!H;${g;s/\(<body>\).*\(<\/body>\)/<body><h1>OpsSchool Rules<\/h1><\/body>/p}' /usr/share/nginx/html/index.html",
       "sudo service nginx start"
     ]
+  }
+
+  tags = {
+    Name = "homework1-nginx"
+    Owner = "David"
+    purpose = "Learning"
   }
 }
 
