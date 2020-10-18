@@ -7,7 +7,7 @@ variable "aws_secret_key" {}
 variable "private_key_path" {}
 variable "key_name" {}
 variable "region" {
-  default = "us-east-2"
+  default = "us-east-1"
 }
 
 ##################################################################################
@@ -24,26 +24,15 @@ provider "aws" {
 # DATA
 ##################################################################################
 
-data "aws_ami" "aws-linux" {
+data "aws_ami" "ubuntu_1804" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
-    values = ["amzn-ami-hvm*"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
   }
 }
-
 
 ##################################################################################
 # RESOURCES
@@ -55,8 +44,8 @@ resource "aws_default_vpc" "default" {
 }
 
 resource "aws_security_group" "allow_ssh" {
-  name        = "nginx_demo"
-  description = "Allow ports for nginx demo"
+  name        = "nginx_sg"
+  description = "Allow ports for nginx"
   vpc_id      = aws_default_vpc.default.id
 
   ingress {
@@ -79,33 +68,41 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
-# TODO: Change ami to one that has nginx preinstalled
-# TODO: remove nginx install
-# TODO: fix sed command or find a different method 
 resource "aws_instance" "nginx" {
-  ami                    = data.aws_ami.aws-linux.id
+  ami                    = data.aws_ami.ubuntu_1804.id
   instance_type          = "t2.micro"
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
+  count = 2
+
+  ebs_block_device {
+    device_name = "/dev/sdb"
+    volume_type = "gp2"
+    volume_size = 10
+    encrypted = true
+  }
 
   connection {
     type        = "ssh"
     host        = self.public_ip
-    user        = "ec2-user"
+    user        = "ubuntu"
     private_key = file(var.private_key_path)
-
   }
 
-  provisioner "remote-exec" {
+  provisioner "file" {
+    source = "opsrule.sh"
+    destination = "/tmp/opsrule.sh" 
+  }
+
+    provisioner "remote-exec" {
     inline = [
-      "sudo yum install nginx -y",
-      "sudo sed -n -i -e '1h;1!H;${g;s/\(<body>\).*\(<\/body>\)/<body><h1>OpsSchool Rules<\/h1><\/body>/p}' /usr/share/nginx/html/index.html",
-      "sudo service nginx start"
+      "sudo chmod +x /tmp/opsrule.sh",
+      "sudo /tmp/opsrule.sh"
     ]
-  }
+  }  
 
   tags = {
-    Name = "homework1-nginx"
+    Name = "homework1-nginx-${count.index}"
     Owner = "David"
     purpose = "Learning"
   }
@@ -116,5 +113,5 @@ resource "aws_instance" "nginx" {
 ##################################################################################
 
 output "aws_instance_public_dns" {
-  value = aws_instance.nginx.public_dns
+  value = aws_instance.nginx[*].public_dns
 }
