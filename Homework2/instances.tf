@@ -3,7 +3,7 @@
 ##################################################################################
 
 provider "aws" {
-  region     = var.aws_region
+  region = var.aws_region
 }
 
 ##################################################################################
@@ -18,7 +18,7 @@ resource "aws_instance" "nginx" {
   subnet_id              = aws_subnet.subnet_public[count.index].id
   depends_on             = [aws_route_table.rt_public]
   user_data              = local.nginx_install
-  tags                   = merge(local.common_tags, {Name = "${local.env_name}-nginx-${count.index}"})
+  tags                   = merge(local.common_tags, { Name = "${local.env_name}-nginx-${count.index}" })
   provisioner "local-exec" {
     command = "ping -c 4 www.google.com"
   }
@@ -32,7 +32,7 @@ resource "aws_instance" "db" {
   vpc_security_group_ids = [aws_security_group.sg.id]
   subnet_id              = aws_subnet.subnet_private[count.index].id
   depends_on             = [aws_nat_gateway.ngw]
-  tags                   = merge(local.common_tags, {Name = "${local.env_name}-db-${count.index}"})
+  tags                   = merge(local.common_tags, { Name = "${local.env_name}-db-${count.index}" })
 
   provisioner "local-exec" {
     command = "ping -c 4 www.google.com"
@@ -40,9 +40,9 @@ resource "aws_instance" "db" {
 }
 
 resource "aws_elb" "elb" {
-  name = "homework2-elb"
-  instances = aws_instance.nginx[*].id
-  subnets = aws_subnet.subnet_public[*].id
+  name            = "homework2-elb"
+  instances       = aws_instance.nginx[*].id
+  subnets         = aws_subnet.subnet_public[*].id
   security_groups = [aws_security_group.sg.id]
 
   cross_zone_load_balancing   = true
@@ -64,12 +64,12 @@ resource "aws_elb" "elb" {
     target              = "HTTP:80/"
     interval            = 30
   }
-  tags = merge(local.common_tags, {Name = "${local.env_name}-elb"})
+  tags = merge(local.common_tags, { Name = "${local.env_name}-elb" })
 }
 
 resource "aws_security_group" "sg" {
   vpc_id = aws_vpc.vpc.id
-  tags = merge(local.common_tags, {Name = "${local.env_name}-sg"})
+  tags   = merge(local.common_tags, { Name = "${local.env_name}-sg" })
 }
 
 resource "aws_security_group_rule" "http_acess" {
