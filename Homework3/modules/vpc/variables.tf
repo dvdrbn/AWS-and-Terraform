@@ -22,3 +22,8 @@ variable "cidr_public" {
   description = "cidrs for public subnets"
   type        = list(string)
 }
+
+variable "cidr_private" {
+  description = "cidrs for private subnets"
+  type        = list(string)
+}
