@@ -33,6 +33,11 @@ variable "user_data" {
   type        = string
 }
 
+variable "instance_profile" {
+  description = "IAM instance profile name"
+  type        = string
+}
+
 variable "tags" {
   description = "Tags to add to all resources"
   type        = map(string)

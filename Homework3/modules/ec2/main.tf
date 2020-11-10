@@ -10,5 +10,6 @@ resource "aws_instance" "ec2" {
   vpc_security_group_ids = var.security_groups
   subnet_id              = var.subnets[count.index]
   user_data              = var.user_data
+  iam_instance_profile   = var.instance_profile
   tags                   = merge(var.tags, { Name = "${var.name}-${var.tags.purpose}-${count.index}" })
 }

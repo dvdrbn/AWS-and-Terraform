@@ -30,11 +30,38 @@ locals {
     project = "Project"
   }
   db_install    = ""
-  nginx_install = ""
-  #   nginx_install = <<-EOF
-  #     #! /bin/bash
+  nginx_install = <<-EOF
+      #! /bin/bash
 
-  #     sudo apt install nginx -y
-  #     service nginx restart
-  #     EOF
+      sudo apt update
+      sudo apt install nginx awscli -y
+
+      sudo sed -i 's/nginx/OpsSchool Rules/g' /var/www/html/index.nginx-debian.html
+      sudo sed -i '15,23d' /var/www/html/index.nginx-debian.html
+      sudo sed -i "14 a $HOSTNAME" /var/www/html/index.nginx-debian.html
+
+      service nginx restart
+
+      crontab -l | { cat; echo "0 * * * * aws s3 cp /var/log/nginx/access.log s3://homework3-nginx-accesslogs/"; } | crontab -
+
+      EOF
+}
+
+variable "assume_role_policy_data" {
+  type    = string
+  default = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+          },
+          "Effect": "Allow",
+          "Sid": ""
+      }
+    ]
+  }
+  EOF
 }
