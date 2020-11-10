@@ -27,26 +27,26 @@ variable "cidr_private" {
 locals {
   env_name = "Homework3"
   common_tags = {
-    project = "Project"
+    project = "OpsSchool"
   }
 }
 
 variable "type_nginx" {
   description = "Type for nginx servers"
-  type = string
-  default = "t2.micro"
+  type        = string
+  default     = "t2.micro"
 }
 
 variable "type_db" {
   description = "Type for db servers"
-  type = string
-  default = "t2.micro"
+  type        = string
+  default     = "t2.micro"
 }
 
 variable "nginx_install" {
   description = "User data for nginx servers"
-  type = string
-  default = <<-EOF
+  type        = string
+  default     = <<-EOF
       #! /bin/bash
 
       sudo apt update
@@ -56,7 +56,7 @@ variable "nginx_install" {
       sudo sed -i '15,23d' /var/www/html/index.nginx-debian.html
       sudo sed -i "14 a $HOSTNAME" /var/www/html/index.nginx-debian.html
 
-      service nginx restart
+      sudo service nginx restart
 
       crontab -l | { cat; echo "0 * * * * aws s3 cp /var/log/nginx/access.log s3://homework3-nginx-access-logs/$HOSTNAME/"; } | crontab -
   EOF
@@ -64,8 +64,8 @@ variable "nginx_install" {
 
 variable "db_install" {
   description = "User data for db servers"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 variable "assume_role_policy_data" {

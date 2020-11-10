@@ -36,6 +36,7 @@ variable "user_data" {
 variable "instance_profile" {
   description = "IAM instance profile name"
   type        = string
+  default     = ""
 }
 
 variable "tags" {
