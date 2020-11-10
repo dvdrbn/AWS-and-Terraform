@@ -29,8 +29,24 @@ locals {
   common_tags = {
     project = "Project"
   }
-  db_install    = ""
-  nginx_install = <<-EOF
+}
+
+variable "type_nginx" {
+  description = "Type for nginx servers"
+  type = string
+  default = "t2.micro"
+}
+
+variable "type_db" {
+  description = "Type for db servers"
+  type = string
+  default = "t2.micro"
+}
+
+variable "nginx_install" {
+  description = "User data for nginx servers"
+  type = string
+  default = <<-EOF
       #! /bin/bash
 
       sudo apt update
@@ -42,9 +58,14 @@ locals {
 
       service nginx restart
 
-      crontab -l | { cat; echo "0 * * * * aws s3 cp /var/log/nginx/access.log s3://homework3-nginx-accesslogs/"; } | crontab -
+      crontab -l | { cat; echo "0 * * * * aws s3 cp /var/log/nginx/access.log s3://homework3-nginx-access-logs/$HOSTNAME/"; } | crontab -
+  EOF
+}
 
-      EOF
+variable "db_install" {
+  description = "User data for db servers"
+  type = string
+  default = ""
 }
 
 variable "assume_role_policy_data" {

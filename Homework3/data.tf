@@ -17,10 +17,10 @@ data "template_file" "policy_s3_access" {
 }
 
 data "template_file" "policy_s3_bucket" {
-  template = file("policy_s3_bucket.tpl")
+  template = file("policy_s3_bucket.json.tpl")
 
   vars = {
     s3_bucket_arn = aws_s3_bucket.b.arn
-    role_arn = aws_iam_role.ec2_s3_access_role.arn
+    role_arn      = aws_iam_role.ec2_s3_access_role.arn
   }
 }
