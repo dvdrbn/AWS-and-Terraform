@@ -1,13 +1,13 @@
-# terraform {
-#   # backend "s3" {
-#   #   bucket = "homework3-terraform-state"
-#   #   key    = "global/s3/terraform.tfstate"
-#   #   region = "us-east-1"
+terraform {
+  backend "s3" {
+    bucket = "homework3-terraform-state"
+    key    = "global/s3/terraform.tfstate"
+    region = "us-east-1"
 
-#   #   dynamodb_table = "homework3-terraform-locks"
-#   #   encrypt        = true
-#   # }
-# }
+    dynamodb_table = "homework3-terraform-locks"
+    encrypt        = true
+  }
+}
 
 provider "aws" {
   region = var.aws_region
